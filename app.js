@@ -9,26 +9,54 @@ export default class App extends EventEmitter {
     super()
     this.swarm = null
     this.fileSystem = null
+    this.key = null // Store the key globally in the class
   }
 
   async ready () {
     console.log('⏳ Starting Synkro P2P Network...')
+    
+    // 1. Ask the user for their role
+    console.log('\n--- Synkro Setup ---')
+    console.log('To CREATE a new network: Just press ENTER')
+    console.log('To JOIN an existing network: Paste the 64-character Drive Key and press ENTER')
+    process.stdout.write('> ')
 
-    // Extract the 64-character hex key from arguments (ignoring flags)
-    let key = null;
-    if (global.Bare && global.Bare.argv) {
-      const hexArg = global.Bare.argv.find(arg => arg.length === 64 && /^[0-9a-fA-F]+$/.test(arg));
-      if (hexArg) {
-        key = hexArg;
+    process.stdin.setEncoding('utf-8')
+    
+    // We use a named function so we can remove this specific listener later
+    const setupListener = async (input) => {
+      const data = input.trim()
+      
+      // Check if it's a valid 64-character hex key
+      if (data.length === 64 && /^[0-9a-fA-F]+$/.test(data)) {
+        this.key = data
+        console.log(`\njoining network with key: ${this.key}...`)
+      } else if (data === '') {
+         console.log('\nCreating a new Synkro network...')
+      } else {
+         console.log('\n❌ Invalid input. Please enter a 64-character hex key or just press ENTER.')
+         process.stdout.write('> ')
+         return // Don't proceed, wait for valid input
       }
+
+      // Remove the setup listener so stdin can be used for syncing later
+      process.stdin.off('data', setupListener)
+      
+      // Proceed to initialize the network
+      await this.initializeNetwork()
     }
 
-    // Use different folders for Reader and Writer
-    const storageDir = key ? './synkro-reader-db' : './synkro-writer-db'
-    const syncDir = key ? './Synkro-Reader-Sync' : './Synkro-Writer-Sync'
+    process.stdin.on('data', setupListener)
+  }
+
+  async initializeNetwork() {
+    // 2. Use different folders for Reader (has key) and Writer (no key)
+    const storageDir = this.key ? './synkro-reader-db' : './synkro-writer-db'
+    const syncDir = this.key ? './Synkro-Reader-Sync' : './Synkro-Writer-Sync'
 
     this.fileSystem = new FileSync(storageDir, syncDir)
-    const store = await this.fileSystem.init(key)
+    const store = await this.fileSystem.init(this.key)
+
     this.swarm = new Hyperswarm()
 
     this.swarm.on('connection', (socket, info) => {
@@ -55,14 +83,14 @@ export default class App extends EventEmitter {
     await discovery.flushed()
     console.log(`[*] Listening for peers in room: ${topicName}`)
     
-    process.stdin.setEncoding('utf-8')
+    // 3. Set up the manual sync trigger (pressing Enter) for Writers
     process.stdin.on('data', (data) => {
       if (data.includes('\n')) {
         this.fileSystem.mirrorToDrive()
       }
     })
     
-    if (!key) {
+    if (!this.key) {
       console.log('💡 Tip: Drop files in "Synkro-Writer-Sync" folder and press ENTER to upload.')
     } else {
        console.log('💡 Tip: Listening for incoming files in "Synkro-Reader-Sync" folder.')
