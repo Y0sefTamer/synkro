@@ -14,12 +14,16 @@ export default class App extends EventEmitter {
   async ready () {
     console.log('⏳ Starting Synkro P2P Network...')
 
-    // Determine roles based on command-line arguments.
-    // If a key is passed, we are the READER. Otherwise, the WRITER.
-    // In Bare, global.Bare.argv contains the command line arguments.
-    const key = (global.Bare && global.Bare.argv.length > 2) ? global.Bare.argv[2] : null;
+    // 1. Improved argument parsing to find the actual 64-character hex key
+    let key = null;
+    if (global.Bare && global.Bare.argv) {
+      // Loop through all arguments and find the one that looks like a 64-char hex string
+      const hexArg = global.Bare.argv.find(arg => arg.length === 64 && /^[0-9a-fA-F]+$/.test(arg));
+      if (hexArg) {
+        key = hexArg;
+      }
+    }
 
-    // Use different folders for Reader and Writer to avoid local fd-lock errors
     const storageDir = key ? './synkro-reader-db' : './synkro-writer-db'
     const syncDir = key ? './Synkro-Reader-Sync' : './Synkro-Writer-Sync'
 
@@ -32,7 +36,6 @@ export default class App extends EventEmitter {
       const peerId = b4a.toString(info.publicKey, 'hex').slice(0, 6)
       console.log(`\n✅ Peer connected! (ID: ${peerId})`)
       
-      // Replicate the hidden database over the Hyperswarm socket
       store.replicate(socket)
 
       socket.on('error', (err) => {
@@ -53,7 +56,6 @@ export default class App extends EventEmitter {
     await discovery.flushed()
     console.log(`[*] Listening for peers in room: ${topicName}`)
     
-    // Trigger local sync when user presses Enter
     process.stdin.setEncoding('utf-8')
     process.stdin.on('data', (data) => {
       if (data.includes('\n')) {
