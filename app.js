@@ -10,7 +10,7 @@ export default class App extends EventEmitter {
   }
 
   async ready () {
-    console.log('⏳ Starting MeshDrive P2P Network...')
+    console.log('⏳ Starting Synkro P2P Network...')
 
     this.swarm = new Hyperswarm()
 
@@ -23,7 +23,6 @@ export default class App extends EventEmitter {
       socket.on('data', (data) => {
         console.log(`📥 Data from friend: ${data.toString()}`)
       })
-
       
       socket.on('error', (err) => {
         if (err.code === 'ECONNRESET') {
@@ -36,10 +35,9 @@ export default class App extends EventEmitter {
       socket.on('close', () => {
         console.log(`🔌 Connection closed (ID: ${peerId})`)
       })
-      // =========================================================
     })
 
-    const topicName = 'meshdrive-hackathon'
+    const topicName = 'synkro-hackathon'
     const topicBuffer = b4a.alloc(32).fill(topicName)
 
     const discovery = this.swarm.join(topicBuffer, { server: true, client: true })
@@ -51,7 +49,7 @@ export default class App extends EventEmitter {
   }
 
   async close () {
-    console.log('🛑 Shutting down MeshDrive...')
+    console.log('🛑 Shutting down Synkro...')
     if (this.swarm) {
       await this.swarm.destroy()
     }
@@ -59,7 +57,7 @@ export default class App extends EventEmitter {
   }
 
   exit (code = 0) {
-    console.log('\n🛑 Exiting MeshDrive gracefully...')
+    console.log('\n🛑 Exiting Synkro gracefully...')
     if (this.swarm) {
       this.swarm.destroy().then(() => {
         process.exit(code)
