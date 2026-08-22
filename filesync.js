@@ -23,16 +23,15 @@ export default class FileSync {
     await this.drive.ready()
     console.log(`🔑 Synkro Drive Key: ${b4a.toString(this.drive.key, 'hex')}`)
     
-    // Setup Debounced Pull to prevent spamming
     this.pull = debounce(this.pullFromDrive.bind(this))
 
     if (key) {
-      // 1. Tell Hyperdrive to eagerly download all file contents automatically!
-      this.drive.download()
+      // Force background download of the entire drive
+      this.drive.download('/')
       
-      // 2. Listen for new files and pull them to the local folder
+      // Listen for updates and trigger pull
       this.drive.core.on('append', async () => {
-        console.log('\n📥 Remote changes detected, auto-syncing...')
+        console.log('\n📥 Remote changes detected, fetching files...')
         await this.pull()
       })
     }
@@ -41,7 +40,7 @@ export default class FileSync {
     return this.store
   }
 
-  // Writer calls this to UPLOAD to the network
+  // Writer: Upload to network (Mirroring from local to drive is reliable)
   async mirrorToDrive () {
     console.log('\n🔄 Uploading local changes to the Synkro network...')
     const mirrorProcess = this.local.mirror(this.drive)
@@ -49,10 +48,35 @@ export default class FileSync {
     console.log(`✅ Upload complete. Files updated: ${mirrorProcess.count}`)
   }
 
-  // Reader calls this to DOWNLOAD from the network
+  // Reader: Robust Manual Pull
   async pullFromDrive () {
-    const mirrorProcess = this.drive.mirror(this.local)
-    await mirrorProcess.done()
-    console.log(`✅ Download complete. Files updated: ${mirrorProcess.count}`)
+    console.log('⏳ Processing incoming files...')
+    let count = 0;
+    
+    try {
+      // Get a list of all files in the decentralized drive
+      const entries = await this.drive.entries()
+      
+      for await (const entry of entries) {
+        const filename = entry.key
+        
+        // Skip metadata or hidden files if any exist
+        if (filename.startsWith('.')) continue;
+
+        console.log(`- Fetching: ${filename}`)
+        
+        // Read file contents from the P2P drive
+        const fileBuffer = await this.drive.get(filename)
+        
+        if (fileBuffer) {
+           // Write the contents to the Magic Sync Folder
+           await this.local.put(filename, fileBuffer)
+           count++;
+        }
+      }
+      console.log(`✅ Download complete. Files processed: ${count}`)
+    } catch (err) {
+      console.error('❌ Error during pull:', err.message)
+    }
   }
 }
