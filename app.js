@@ -14,11 +14,16 @@ export default class App extends EventEmitter {
   async ready () {
     console.log('⏳ Starting Synkro P2P Network...')
 
-    // Read the key natively using bare-process
-    const envKey = process.env.SYNKRO_KEY;
-    const key = (envKey && envKey.length === 64) ? envKey : null;
+    // Extract the 64-character hex key from arguments (ignoring flags)
+    let key = null;
+    if (global.Bare && global.Bare.argv) {
+      const hexArg = global.Bare.argv.find(arg => arg.length === 64 && /^[0-9a-fA-F]+$/.test(arg));
+      if (hexArg) {
+        key = hexArg;
+      }
+    }
 
-    // Use different folders for Reader and Writer to avoid local fd-lock errors
+    // Use different folders for Reader and Writer
     const storageDir = key ? './synkro-reader-db' : './synkro-writer-db'
     const syncDir = key ? './Synkro-Reader-Sync' : './Synkro-Writer-Sync'
 
