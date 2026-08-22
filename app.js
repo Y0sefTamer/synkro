@@ -14,22 +14,16 @@ export default class App extends EventEmitter {
   async ready () {
     console.log('⏳ Starting Synkro P2P Network...')
 
-    // 1. Improved argument parsing to find the actual 64-character hex key
-    let key = null;
-    if (global.Bare && global.Bare.argv) {
-      // Loop through all arguments and find the one that looks like a 64-char hex string
-      const hexArg = global.Bare.argv.find(arg => arg.length === 64 && /^[0-9a-fA-F]+$/.test(arg));
-      if (hexArg) {
-        key = hexArg;
-      }
-    }
+    // Read the key from the Environment Variable (SYNKRO_KEY)
+    const envKey = global.Bare && global.Bare.env && global.Bare.env.SYNKRO_KEY;
+    const key = (envKey && envKey.length === 64) ? envKey : null;
 
+    // Use different folders for Reader and Writer to avoid local fd-lock errors
     const storageDir = key ? './synkro-reader-db' : './synkro-writer-db'
     const syncDir = key ? './Synkro-Reader-Sync' : './Synkro-Writer-Sync'
 
     this.fileSystem = new FileSync(storageDir, syncDir)
     const store = await this.fileSystem.init(key)
-
     this.swarm = new Hyperswarm()
 
     this.swarm.on('connection', (socket, info) => {
