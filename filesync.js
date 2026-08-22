@@ -40,27 +40,36 @@ export default class FileSync {
     return this.store
   }
 
-  // Writer: Upload to network (Mirroring from local to drive is reliable)
+ // Writer: Upload to network
   async mirrorToDrive () {
     console.log('\n🔄 Uploading local changes to the Synkro network...')
     const mirrorProcess = this.local.mirror(this.drive)
     await mirrorProcess.done()
-    console.log(`✅ Upload complete. Files updated: ${mirrorProcess.count}`)
+    
+ 
+    const added = mirrorProcess.count.add || 0;
+    const changed = mirrorProcess.count.change || 0;
+    
+    console.log(`✅ Upload complete. Added: ${added} | Changed: ${changed}`)
   }
 
+  
   // Reader: Robust Manual Pull
   async pullFromDrive () {
-    console.log('⏳ Processing incoming files...')
+    console.log('⏳ Syncing latest state from peers...')
     let count = 0;
     
     try {
-      // Get a list of all files in the decentralized drive
+      // THE MAGIC FIX: Force the drive to fetch the newest metadata from the Writer
+      await this.drive.update()
+      
+      // Now get the list of all files
       const entries = await this.drive.entries()
       
       for await (const entry of entries) {
         const filename = entry.key
         
-        // Skip metadata or hidden files if any exist
+        // Skip metadata or hidden files
         if (filename.startsWith('.')) continue;
 
         console.log(`- Fetching: ${filename}`)
