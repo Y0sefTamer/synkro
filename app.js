@@ -1,10 +1,10 @@
 import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
-import EventEmitter from 'events'
+import EventEmitter from 'bare-events' // التعديل البسيط هنا
 
 export default class App extends EventEmitter {
   constructor () {
-    super() // Initializes the EventEmitter instance
+    super() // Initializes the bare-events instance
     this.initNetwork()
   }
 
