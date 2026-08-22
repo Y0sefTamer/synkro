@@ -1,9 +1,10 @@
 import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
+import EventEmitter from 'events'
 
-export default class App {
+export default class App extends EventEmitter {
   constructor () {
-    // This executes immediately when bin.mjs initializes the app
+    super() // Initializes the EventEmitter instance
     this.initNetwork()
   }
 
