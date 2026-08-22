@@ -5,19 +5,19 @@ import debounce from 'debounceify'
 import b4a from 'b4a'
 
 export default class FileSync {
-  constructor (storageDir = './meshdrive-db', syncDir = './MeshDrive-Sync') {
+ 
+  constructor (storageDir, syncDir) {
     // Hidden database for P2P storage
     this.store = new Corestore(storageDir)
     
     // The magic folder users will interact with
     this.local = new Localdrive(syncDir)
     
-    // We will initialize the drive later once we have the key
     this.drive = null 
   }
 
   async init (key = null) {
-    console.log('📂 Initializing File System...')
+    console.log('📂 Initializing Synkro File System...')
     
     // If a key is provided, we act as a Reader. Otherwise, we act as a Writer.
     if (key) {
@@ -27,7 +27,7 @@ export default class FileSync {
     }
 
     await this.drive.ready()
-    console.log(`🔑 Drive Key: ${b4a.toString(this.drive.key, 'hex')}`)
+    console.log(`🔑 Synkro Drive Key: ${b4a.toString(this.drive.key, 'hex')}`)
     
     this.mirror = debounce(this.mirrorToDrive.bind(this))
     
@@ -45,13 +45,9 @@ export default class FileSync {
 
   // Call this manually (e.g., on Enter key) to push local changes to the network
   async mirrorToDrive () {
-    console.log('🔄 Syncing local changes to the network...')
+    console.log('🔄 Syncing local changes to the Synkro network...')
     const mirrorProcess = this.local.mirror(this.drive)
     await mirrorProcess.done()
     console.log(`✅ Sync complete. Files mirrored: ${mirrorProcess.count}`)
-  }
-
-  getStore () {
-    return this.store
   }
 }

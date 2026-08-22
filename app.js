@@ -12,11 +12,19 @@ export default class App extends EventEmitter {
   }
 
   async ready () {
-    console.log('⏳ Starting MeshDrive P2P Network...')
+    console.log('⏳ Starting Synkro P2P Network...')
 
-    // Initialize File Sync (Acting as Writer by default for simplicity)
-    this.fileSystem = new FileSync()
-    const store = await this.fileSystem.init()
+    // Determine roles based on command-line arguments.
+    // If a key is passed, we are the READER. Otherwise, the WRITER.
+    // In Bare, global.Bare.argv contains the command line arguments.
+    const key = (global.Bare && global.Bare.argv.length > 2) ? global.Bare.argv[2] : null;
+
+    // Use different folders for Reader and Writer to avoid local fd-lock errors
+    const storageDir = key ? './synkro-reader-db' : './synkro-writer-db'
+    const syncDir = key ? './Synkro-Reader-Sync' : './Synkro-Writer-Sync'
+
+    this.fileSystem = new FileSync(storageDir, syncDir)
+    const store = await this.fileSystem.init(key)
 
     this.swarm = new Hyperswarm()
 
@@ -24,10 +32,8 @@ export default class App extends EventEmitter {
       const peerId = b4a.toString(info.publicKey, 'hex').slice(0, 6)
       console.log(`\n✅ Peer connected! (ID: ${peerId})`)
       
-      // === THE MAGIC INTEGRATION ===
       // Replicate the hidden database over the Hyperswarm socket
       store.replicate(socket)
-      // =============================
 
       socket.on('error', (err) => {
         if (err.code === 'ECONNRESET') {
@@ -40,7 +46,7 @@ export default class App extends EventEmitter {
       })
     })
 
-    const topicName = 'meshdrive-hackathon'
+    const topicName = 'synkro-hackathon-room'
     const topicBuffer = b4a.alloc(32).fill(topicName)
     const discovery = this.swarm.join(topicBuffer, { server: true, client: true })
 
@@ -54,19 +60,24 @@ export default class App extends EventEmitter {
         this.fileSystem.mirrorToDrive()
       }
     })
-    console.log('💡 Tip: Drop files in "MeshDrive-Sync" folder and press ENTER to upload.')
+    
+    if (!key) {
+      console.log('💡 Tip: Drop files in "Synkro-Writer-Sync" folder and press ENTER to upload.')
+    } else {
+       console.log('💡 Tip: Listening for incoming files in "Synkro-Reader-Sync" folder.')
+    }
 
     this.emit('ready')
   }
 
   async close () {
-    console.log('🛑 Shutting down MeshDrive...')
+    console.log('🛑 Shutting down Synkro...')
     if (this.swarm) await this.swarm.destroy()
     this.emit('close')
   }
 
   exit (code = 0) {
-    console.log('\n🛑 Exiting MeshDrive gracefully...')
+    console.log('\n🛑 Exiting Synkro gracefully...')
     if (this.swarm) {
       this.swarm.destroy().then(() => process.exit(code))
     } else {
