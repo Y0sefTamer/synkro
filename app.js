@@ -1,6 +1,7 @@
 import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
 import EventEmitter from 'bare-events'
+import process from 'bare-process' // أضفنا مكتبة العمليات هنا
 
 export default class App extends EventEmitter {
   constructor () {
@@ -8,7 +9,6 @@ export default class App extends EventEmitter {
     this.swarm = null
   }
 
-  // bin.mjs calls this automatically when starting
   async ready () {
     console.log('⏳ Starting MeshDrive P2P Network...')
 
@@ -33,16 +33,27 @@ export default class App extends EventEmitter {
     await discovery.flushed()
     console.log(`[*] Listening for peers in room: ${topicName}`)
     
-    // Announce that initialization is complete
     this.emit('ready')
   }
 
-  // bin.mjs calls this automatically when shutting down
+  // bin.mjs calls this automatically when shutting down via code
   async close () {
     console.log('🛑 Shutting down MeshDrive...')
     if (this.swarm) {
       await this.swarm.destroy()
     }
     this.emit('close')
+  }
+
+  // bin.mjs calls this automatically on Ctrl+C (SIGINT)
+  exit (code = 0) {
+    console.log('\n🛑 Exiting MeshDrive gracefully...')
+    if (this.swarm) {
+      this.swarm.destroy().then(() => {
+        process.exit(code)
+      })
+    } else {
+      process.exit(code)
+    }
   }
 }
