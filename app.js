@@ -1,10 +1,9 @@
 import Hyperswarm from 'hyperswarm'
-import crypto from 'hypercore-crypto'
 import b4a from 'b4a'
 
 export default class App {
   constructor () {
-    // بمجرد ما bin.mjs يعمل new App()، الدالة دي هتشتغل فوراً
+    // This executes immediately when bin.mjs initializes the app
     this.initNetwork()
   }
 
@@ -16,6 +15,7 @@ export default class App {
 
     // 2. Handle incoming peer connections
     swarm.on('connection', (socket, info) => {
+      // Extract a short peer ID for logging purposes
       const peerId = b4a.toString(info.publicKey, 'hex').slice(0, 6)
       
       console.log(`\n✅ Peer connected! (ID: ${peerId})`)
@@ -29,9 +29,9 @@ export default class App {
       })
     })
 
-    // 3. Create a deterministic topic buffer from a secret room name
-    const topicName = 'meshdrive-secret-room-1'
-    const topicBuffer = crypto.discoveryKey(b4a.from(topicName, 'utf8'))
+    // 3. Create a strictly 32-byte buffer for the network topic
+    const topicName = 'meshdrive-hackathon'
+    const topicBuffer = b4a.alloc(32).fill(topicName)
 
     // 4. Join the swarm topic to find other peers
     const discovery = swarm.join(topicBuffer, { server: true, client: true })
