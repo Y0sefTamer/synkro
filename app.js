@@ -83,17 +83,21 @@ export default class App extends EventEmitter {
     await discovery.flushed()
     console.log(`[*] Listening for peers in room: ${topicName}`)
     
-    // 3. Set up the manual sync trigger (pressing Enter) for Writers
+    // 3. Set up the manual sync trigger (pressing Enter) for WRITERS ONLY
     process.stdin.on('data', (data) => {
-      if (data.includes('\n')) {
+      // If this is a Writer (no key was provided initially)
+      if (!this.key && data.includes('\n')) {
         this.fileSystem.mirrorToDrive()
+      } else if (this.key && data.includes('\n')) {
+         // Don't try to sync, just inform the user
+         console.log('ℹ️ You are a Reader. Your folder updates automatically. You cannot upload files.')
       }
     })
     
     if (!this.key) {
       console.log('💡 Tip: Drop files in "Synkro-Writer-Sync" folder and press ENTER to upload.')
     } else {
-       console.log('💡 Tip: Listening for incoming files in "Synkro-Reader-Sync" folder.')
+       console.log('💡 Tip: Listening for incoming files in "Synkro-Reader-Sync" folder (Automatic).')
     }
 
     this.emit('ready')
