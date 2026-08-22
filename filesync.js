@@ -5,21 +5,15 @@ import debounce from 'debounceify'
 import b4a from 'b4a'
 
 export default class FileSync {
- 
   constructor (storageDir, syncDir) {
-    // Hidden database for P2P storage
     this.store = new Corestore(storageDir)
-    
-    // The magic folder users will interact with
     this.local = new Localdrive(syncDir)
-    
     this.drive = null 
   }
 
   async init (key = null) {
     console.log('📂 Initializing Synkro File System...')
     
-    // If a key is provided, we act as a Reader. Otherwise, we act as a Writer.
     if (key) {
       this.drive = new Hyperdrive(this.store, b4a.from(key, 'hex'))
     } else {
@@ -29,25 +23,36 @@ export default class FileSync {
     await this.drive.ready()
     console.log(`🔑 Synkro Drive Key: ${b4a.toString(this.drive.key, 'hex')}`)
     
-    this.mirror = debounce(this.mirrorToDrive.bind(this))
-    
-    // Auto-sync when remote changes occur (for readers)
-    this.drive.core.on('append', async () => {
-      console.log('📥 Remote changes detected, syncing to local folder...')
-      const mirrorProcess = this.drive.mirror(this.local)
-      await mirrorProcess.done()
-      console.log(`✅ Download complete.`)
-    })
+    // Setup Debounced Pull to prevent spamming
+    this.pull = debounce(this.pullFromDrive.bind(this))
+
+    if (key) {
+      // 1. Tell Hyperdrive to eagerly download all file contents automatically!
+      this.drive.download()
+      
+      // 2. Listen for new files and pull them to the local folder
+      this.drive.core.on('append', async () => {
+        console.log('\n📥 Remote changes detected, auto-syncing...')
+        await this.pull()
+      })
+    }
 
     console.log('✅ File System Ready!')
     return this.store
   }
 
-  // Call this manually (e.g., on Enter key) to push local changes to the network
+  // Writer calls this to UPLOAD to the network
   async mirrorToDrive () {
-    console.log('🔄 Syncing local changes to the Synkro network...')
+    console.log('\n🔄 Uploading local changes to the Synkro network...')
     const mirrorProcess = this.local.mirror(this.drive)
     await mirrorProcess.done()
-    console.log(`✅ Sync complete. Files mirrored: ${mirrorProcess.count}`)
+    console.log(`✅ Upload complete. Files updated: ${mirrorProcess.count}`)
+  }
+
+  // Reader calls this to DOWNLOAD from the network
+  async pullFromDrive () {
+    const mirrorProcess = this.drive.mirror(this.local)
+    await mirrorProcess.done()
+    console.log(`✅ Download complete. Files updated: ${mirrorProcess.count}`)
   }
 }
