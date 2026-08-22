@@ -1,6 +1,7 @@
 const FramedStream = require('framed-stream')
 const PearRuntime = require('pear-runtime')
 const ReadyResource = require('ready-resource')
+const { swarm } = require('./network.js')
 
 module.exports = class App extends ReadyResource {
   constructor({ dir, app, updates, version, upgrade, name }) {
