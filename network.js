@@ -45,3 +45,5 @@ const discovery = swarm.join(topicBuffer, { server: true, client: true })
 discovery.flushed().then(() => {
   console.log(`[*] Swarm flushed. Listening for peers on topic: ${topicName}`)
 })
+
+module.exports = { swarm }
