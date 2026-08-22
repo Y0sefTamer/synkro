@@ -14,8 +14,8 @@ export default class App extends EventEmitter {
   async ready () {
     console.log('⏳ Starting Synkro P2P Network...')
 
-    // Read the key from the Environment Variable (SYNKRO_KEY)
-    const envKey = global.Bare && global.Bare.env && global.Bare.env.SYNKRO_KEY;
+    // Read the key natively using bare-process
+    const envKey = process.env.SYNKRO_KEY;
     const key = (envKey && envKey.length === 64) ? envKey : null;
 
     // Use different folders for Reader and Writer to avoid local fd-lock errors
