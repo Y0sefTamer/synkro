@@ -134,3 +134,15 @@ pear build --package=package.json --win32-x64-app=./out/win32-x64/synkro --targe
 pear stage <pear-link> ./deploy
 pear seed <pear-link> 
 ```
+---
+
+## 📦 Supported Platforms & Built Binaries
+
+To ensure native, seamless installation via `pear install` across different operating systems, standalone binaries were explicitly built, packaged, and shipped in this deployment for the following architectures:
+
+- 🪟 **Windows (x64):** Built for `win32-x64` (shipped as `synkro.exe`).
+- 🐧 **Linux (x64):** Built for `linux-x64`.
+
+> **Note:** Because Synkro runs on the Pear/Bare decentralized runtime, the underlying codebase is inherently cross-platform. macOS users can still seamlessly interact with the network and run the source via the Pear CLI.
+
+---
