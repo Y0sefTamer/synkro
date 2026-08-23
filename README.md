@@ -10,7 +10,7 @@ Synkro eliminates the need for centralized cloud storage (like Google Drive or D
 
 ## 🔗 Quick Links
 * 🚀 **Run the App (Pear Link):** `pear://fhe31rfz6wktgozcryhon7jnfnpda5jsmopecka6utabtokpxb6o`
-* 🎥 **Pitch/Demo Video:** [Insert Video URL Here]
+* 🎥 **Pitch/Demo Video:** https://youtu.be/4fjl3_hGBb8
 
 ---
 
