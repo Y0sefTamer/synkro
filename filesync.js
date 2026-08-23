@@ -3,10 +3,15 @@ import Localdrive from 'localdrive'
 import Hyperdrive from 'hyperdrive'
 import debounce from 'debounceify'
 import b4a from 'b4a'
+import fs from 'fs'
 
 export default class FileSync {
   constructor (storageDir, syncDir) {
     this.store = new Corestore(storageDir)
+    // THE FIX: Create the Magic Folder automatically if it doesn't exist
+    if (!fs.existsSync(syncDir)) {
+      fs.mkdirSync(syncDir, { recursive: true })
+    }
     this.local = new Localdrive(syncDir)
     this.drive = null 
   }
