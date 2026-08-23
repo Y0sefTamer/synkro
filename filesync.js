@@ -3,7 +3,7 @@ import Localdrive from 'localdrive'
 import Hyperdrive from 'hyperdrive'
 import debounce from 'debounceify'
 import b4a from 'b4a'
-import fs from 'fs'
+import fs from 'bare-fs'
 
 export default class FileSync {
   constructor (storageDir, syncDir) {
