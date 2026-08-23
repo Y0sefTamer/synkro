@@ -1,13 +1,11 @@
 {
   "name": "synkro",
-  "version": "1.0.2",
+  "version": "2.0.5",
   "description": "Decentralized P2P File Synchronization via Pear/Bare",
   "private": true,
+  "bin":"./bin.mjs",
+  "upgrade": "pear://fhe31rfz6wktgozcryhon7jnfnpda5jsmopecka6utabtokpxb6o", 
   "main": "bin.mjs",
-  "bin": {
-    "synkro": "./bin.mjs"
-  },
-  "upgrade": "pear://fhe31rfz6wktgozcryhon7jnfnpda5jsmopecka6utabtokpxb6o",
   "scripts": {
     "format": "prettier . --write",
     "test": "brittle-bare test/index.js",
