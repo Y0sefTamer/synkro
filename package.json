@@ -1,17 +1,20 @@
 {
   "name": "synkro",
-  "version": "0.0.0",
-  "description": "Pear Runtime CLI boilerplate using Bare with OTA updater support.",
+  "version": "1.0.2",
+  "description": "Decentralized P2P File Synchronization via Pear/Bare",
   "private": true,
-  "bin": "bin.mjs",
-  "upgrade": "pear://z57bjw8s4n9mdf1oaj55yib13uhpzbncwctf6gm1q1j58cyc7u1o",
+  "main": "bin.mjs",
+  "bin": {
+    "synkro": "./bin.mjs"
+  },
+  "upgrade": "pear://fhe31rfz6wktgozcryhon7jnfnpda5jsmopecka6utabtokpxb6o",
   "scripts": {
     "format": "prettier . --write",
     "test": "brittle-bare test/index.js",
     "lint": "prettier . --check && lunte",
     "start": "bare bin.mjs --no-updates",
     "reader": "bare bin.mjs --no-updates --",
-    "make": "node scripts/make.js",
+    "make": "node scripts/make.cjs",
     "make:darwin-arm64": "bare-build --name synkro --standalone --host darwin-arm64 --out ./out/darwin-arm64 bin.mjs",
     "make:darwin-x64": "bare-build --name synkro --standalone --host darwin-x64 --out ./out/darwin-x64 bin.mjs",
     "make:linux-arm64": "bare-build --name synkro --standalone --host linux-arm64 --out ./out/linux-arm64 bin.mjs",
