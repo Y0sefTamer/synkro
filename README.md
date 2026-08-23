@@ -75,52 +75,62 @@ sequenceDiagram
 * **File System:** Hyperdrive (Decentralized) & Localdrive (Local FS interaction)
 * **Core Logic:** JavaScript (ES Modules)
 
-## 💻 How to Test & Use Synkro 
-We have made it incredibly simple to test the P2P capabilities of Synkro without needing to download the source code.
+## 🛠️ Prerequisites (For Judges & Users)
 
-### Prerequisites
-Ensure you have the Pear runtime installed. If not, install it globally:
+Ensure you have the Pear CLI installed (v3.0+):
+- **macOS / Linux:** `curl https://install.pears.com/pear.sh | sh`
+- **Windows:** `irm https://install.pears.com/pear.ps1 | iex`
+
+---
+
+## 🚀 Installation
+
+Synkro is distributed securely over the Pear P2P network. To install it natively on your machine, simply run:
+
 ```bash
-npm install -g pear
+pear install pear://fhe31rfz6wktgozcryhon7jnfnpda5jsmopecka6utabtokpxb6o
 ```
-### Step 1: Start the Writer (Source)
+Important: After installation, restart your terminal/shell to ensure the synkro command is added to your system's PATH.
 
-* 1. Open a new terminal. 
-* 2. Run the Synkro application via the Pear link:
+## 💻 How to Use (Demonstration Guide)
+To demonstrate the P2P sync, you will need two terminal windows (they can be on the same machine, or across different machines/OSes).
+### Step 1: Initialize the Writer (Source)
+* Open a terminal and run the application:
 ```bash
-pear run pear://z57bjw8s4n9mdf1oaj55yib13uhpzbncwctf6gm1q1j58cyc7u1o
+synkro
 ```
-* 3. The terminal will initialize the file system, generate a Drive Key, and auto-create a folder named Synkro-Writer-Sync in your current directory.
-* 4. Copy the generated Drive Key.
-#### Step 2: Start the Reader (Destination)
-
-* 1. Open a second terminal (preferably in a different directory to see the magic clearly).
-* 2. Run the same command, but paste the Drive Key at the end:
+* The interactive prompt will ask if you want to create a new connection or join an existing one.
+* Press ENTER without typing anything to create a new connection.
+* The application will generate a unique Drive Key and auto-create a folder named Synkro-Writer-Sync in your current directory.
+* Copy the generated Drive Key.
+### Step 2: Connect the Reader (Destination)
+* Open a second terminal (preferably in a different directory).
+* Start the application again:
 ```bash
-pear run pear://z57bjw8s4n9mdf1oaj55yib13uhpzbncwctf6gm1q1j58cyc7u1o <PASTE_DRIVE_KEY_HERE>
+synkro
 ```
-* 3. The terminal will connect to the Writer and auto-create a folder named Synkro-Reader-Sync.
+* When prompted, paste the Drive Key you copied from the Writer and press ENTER.
+* The application will connect to the Writer and auto-create a folder named Synkro-Reader-Sync.
 
-### Step 3: Test the Sync!
+### Step 3: Test the P2P Sync
+* Drop any file (e.g., an image or text file) into the Synkro-Writer-Sync folder.
+* Go to the Writer Terminal and press ENTER to push the changes to the network.
+* The Reader Terminal will automatically detect and download the file into the Synkro-Reader-Sync folder!
 
-* 1. Go to the Synkro-Writer-Sync folder and place any file (e.g., an image or text file) inside it.
-* 2. Go back to the Writer Terminal and press ENTER to trigger the upload.
-* 3. Check the Reader Terminal. It should automatically detect and download the file into the Synkro-Reader-Sync folder!
-* 4. (Fallback Option): If the auto-download doesn't trigger immediately, simply press ENTER in the Reader Terminal to force a manual pull.
+## 🏗️ Developer Notes (Building from Source)
+If you are evaluating the build process, Synkro utilizes bare-build for cross-compilation.
 
-## 🛠️ Local Development
-If you want to run the project locally from the source code:
-
-* 1. Clone the repository and navigate to the project folder.
-* 2. Run the Writer:
 ```bash
-1. npm start
-2. Press Enter
-3. Copy drive-key
-```
-* 3. Run the Reader:
-```bash
-1. npm start
-2. past the drive-key 
-3. Press Enter
+# Build for Linux
+npm run make:linux-x64
+
+# Build for Windows
+npm run make:win32-x64
+
+# Package the deployment structure
+pear build --package=package.json --win32-x64-app=./out/win32-x64/synkro --target=./deploy
+
+# Stage and Seed to the network
+pear stage <pear-link> ./deploy
+pear seed <pear-link> 
 ```
