@@ -4,7 +4,7 @@
 
 > **Serverless, lightning-fast file synchronization across devices using the Pear/Bare ecosystem.**
 
-Synkro eliminates the need for centralized cloud storage (like Google Drive or Dropbox) by enabling direct, peer-to-peer (P2P) file synchronization. It securely mirrors files between a "Writer" (source) and one or multiple "Readers" (destinations) without any intermediary servers.
+**Synkro** eliminates the need for centralized cloud storage (like Google Drive or Dropbox) by enabling direct, peer-to-peer (P2P) file synchronization. It securely mirrors files between a "Writer" (source) and one or multiple "Readers" (destinations) without any intermediary servers.
 
 ---
 
