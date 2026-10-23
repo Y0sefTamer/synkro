@@ -146,3 +146,4 @@ To ensure native, seamless installation via `pear install` across different oper
 > **Note:** Because Synkro runs on the Pear/Bare decentralized runtime, the underlying codebase is inherently cross-platform. macOS users can still seamlessly interact with the network and run the source via the Pear CLI.
 
 ---
+Feel free to contact us
